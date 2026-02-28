@@ -81,17 +81,29 @@ public class ICCompilerLog implements ICStepThroughAssembler.EventReceiver {
     }
 
     public void readDesc(MCDataInput in) {
-        clear();
-        compileTree.readDesc(in);
-        completedSteps = in.readInt();
-        int size = in.readInt();
-        for (int i = 0; i < size; i++) currentPath.add(in.readInt());
+        try {
+            clear();
+            compileTree.readDesc(in);
+            completedSteps = in.readInt();
+            int size = in.readInt();
+            for (int i = 0; i < size; i++) {
+                try {
+                    currentPath.add(in.readInt());
+                }
+                catch(Exception e) {
+                    currentPath.add(-1);
+                }
+            }
 
-        size = in.readVarInt();
-        for (int i = 0; i < size; i++) {
-            CompileProblem problem = CompileProblemType.createById(in.readUByte());
-            problem.readDesc(in);
-            addProblemInternal(problem);
+            size = in.readVarInt();
+            for (int i = 0; i < size; i++) {
+                CompileProblem problem = CompileProblemType.createById(in.readUByte());
+                problem.readDesc(in);
+                addProblemInternal(problem);
+            }
+        }
+        catch(Exception e) {
+            currentPath.add(-1);
         }
     }
 
